@@ -1,0 +1,86 @@
+cmake_minimum_required(VERSION 3.14.0)
+project(WaterShader VERSION 0.1.0)
+
+
+# ======================= Dependencies =======================
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw
+    GIT_TAG 3.3.7
+)
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm
+)
+FetchContent_Declare(
+    objloader
+    GIT_REPOSITORY https://github.com/Bly7/OBJ-Loader
+)
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui
+)
+
+FetchContent_MakeAvailable(glfw glm objloader imgui)
+
+
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
+add_library(imgui)
+target_include_directories(imgui PUBLIC
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+)
+target_sources(imgui PRIVATE
+    ${imgui_SOURCE_DIR}/imconfig.h
+    ${imgui_SOURCE_DIR}/imgui.h
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_internal.h
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
+target_link_libraries(imgui PRIVATE 
+    glfw
+    ${CMAKE_DL_LIBS}
+)
+
+
+add_library(objloader INTERFACE)
+target_include_directories(objloader INTERFACE
+    ${objloader_SOURCE_DIR}/Source
+)
+target_sources(objloader INTERFACE
+    ${objloader_SOURCE_DIR}/Source/OBJ_Loader.h
+)
+
+
+
+# ======================= Program =======================
+add_executable(WaterShader)
+
+target_sources(WaterShader PRIVATE
+    ${WaterShader_SOURCE_DIR}/src/main.cpp
+)
+
+target_include_directories(WaterShader PRIVATE
+    ${WaterShader_SOURCE_DIR}
+)
+
+target_link_libraries(WaterShader PRIVATE
+    glfw
+    ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    glm
+    objloader
+    imgui
+)
