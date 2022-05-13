@@ -6,14 +6,14 @@
 Framebuffer::Framebuffer() 
 {
     m_fbo = m_rbo = 0;
-    m_cbo = nullptr;
-    m_ownsCbo = false;
+    m_ownedCbo = nullptr;
+    m_size = {0, 0};
 }
 
 Framebuffer::~Framebuffer() 
 {
-    if(m_cbo && m_ownsCbo) {
-        delete m_cbo;
+    if(m_ownedCbo) {
+        delete m_ownedCbo;
     }
     // FBO and RBO are always created together, so we can only check one of them
     if(m_fbo != 0) {
@@ -26,24 +26,24 @@ Framebuffer::Framebuffer(Framebuffer&& other)
 {
     m_fbo = other.m_fbo;
     m_rbo = other.m_rbo;
-    m_cbo = other.m_cbo;
-    m_ownsCbo = other.m_ownsCbo;
+    m_ownedCbo = other.m_ownedCbo;
+    m_size = other.m_size;
 
     other.m_fbo = other.m_rbo = 0;
-    other.m_cbo = nullptr;
-    other.m_ownsCbo = false;
+    other.m_ownedCbo = nullptr;
+    other.m_size = {0, 0};
 }
 
 Framebuffer& Framebuffer::operator=(Framebuffer&& other) 
 {
     m_fbo = other.m_fbo;
     m_rbo = other.m_rbo;
-    m_cbo = other.m_cbo;
-    m_ownsCbo = other.m_ownsCbo;
+    m_ownedCbo = other.m_ownedCbo;
+    m_size = other.m_size;
 
     other.m_fbo = other.m_rbo = 0;
-    other.m_cbo = nullptr;
-    other.m_ownsCbo = false;
+    other.m_ownedCbo = nullptr;
+    other.m_size = {0, 0};
 
     return *this;
 }
@@ -59,15 +59,13 @@ bool Framebuffer::fromTarget(Texture *texture)
         glDeleteRenderbuffers(1, &m_rbo);
         glDeleteFramebuffers(1, &m_fbo);
     }
-    if(m_cbo && m_ownsCbo) {
-        delete m_cbo;
+    if(m_ownedCbo) {
+        delete m_ownedCbo;
+        m_ownedCbo = nullptr;
     }
 
     glGenFramebuffers(1, &m_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
-    m_cbo = texture;
-    m_ownsCbo = false;
 
     glGenRenderbuffers(1, &m_rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
@@ -88,13 +86,15 @@ bool Framebuffer::fromTarget(Texture *texture)
         return false;
     }
 
+    m_size = texture->getSize();
+
     return true;
 }
 
-bool Framebuffer::fromBlank(glm::ivec2 size, GLenum format) 
+bool Framebuffer::fromBlank(glm::ivec2 size) 
 {
     Texture *cbo = new Texture();
-    if(!cbo->fromBlank(size, format)) {
+    if(!cbo->fromBlank(size, GL_RGB)) {
         printf("Failed to create texture for framebuffer\n");
         delete cbo;
         return false;
@@ -106,6 +106,34 @@ bool Framebuffer::fromBlank(glm::ivec2 size, GLenum format)
         return false;
     }
 
-    m_ownsCbo = true;
+    m_ownedCbo = cbo;
+
     return true;
+}
+
+bool Framebuffer::fromWindow(GLFWwindow *window) 
+{
+    if(!window) {
+        printf("Window given for framebuffer is invalid\n");
+        return false;
+    }
+    if(m_fbo != 0) {
+        glDeleteRenderbuffers(1, &m_rbo);
+        glDeleteFramebuffers(1, &m_fbo);
+    }
+    if(m_ownedCbo) {
+        delete m_ownedCbo;
+        m_ownedCbo = nullptr;
+    }
+
+    m_fbo = m_rbo = 0;
+    glfwGetWindowSize(window, &m_size.x, &m_size.y);
+
+    return true;
+}
+
+void Framebuffer::bind() const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glViewport(0, 0, m_size.x, m_size.y);
 }

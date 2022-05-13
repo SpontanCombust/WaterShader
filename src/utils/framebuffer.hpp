@@ -3,13 +3,17 @@
 #include "texture.hpp"
 
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class Framebuffer
 {
 private:
     GLuint m_fbo, m_rbo;
-    Texture *m_cbo;
-    bool m_ownsCbo;
+    Texture *m_ownedCbo;
+    // cbo may also have the size, but we won't necessairly be using cbo 
+    // for example when using this framebuffer as the default GL framebuffer
+    glm::ivec2 m_size; 
 
 public:
     Framebuffer();
@@ -25,5 +29,9 @@ public:
 
     // just remember to use the framebuffer beyond this texture's lifetime
     bool fromTarget(Texture *texture);
-    bool fromBlank(glm::ivec2 size, GLenum format);
+    bool fromBlank(glm::ivec2 size);
+    bool fromWindow(GLFWwindow *window); // to make a default GL framebuffer
+
+    void bind() const;
+    // no unbind function as that would require remembering the previous FBO size
 };
