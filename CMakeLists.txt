@@ -14,17 +14,25 @@ FetchContent_Declare(
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm
+    GIT_TAG 0.9.9.8
 )
 FetchContent_Declare(
     objloader
     GIT_REPOSITORY https://github.com/Bly7/OBJ-Loader
+    GIT_TAG 03b06bf50bca2953a0ccd2d2ba373b27f46eecf2
+)
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb
+    GIT_TAG af1a5bc352164740c1cc1354942b1c6b72eacb8a
 )
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui
+    GIT_TAG v1.87
 )
 
-FetchContent_MakeAvailable(glfw glm objloader imgui)
+FetchContent_MakeAvailable(glfw glm objloader stb imgui)
 
 
 find_package(OpenGL REQUIRED)
@@ -54,21 +62,31 @@ target_link_libraries(imgui PRIVATE
     ${CMAKE_DL_LIBS}
 )
 
-
 add_library(objloader INTERFACE)
-target_include_directories(objloader INTERFACE
-    ${objloader_SOURCE_DIR}/Source
-)
-target_sources(objloader INTERFACE
-    ${objloader_SOURCE_DIR}/Source/OBJ_Loader.h
-)
+target_include_directories(objloader INTERFACE ${objloader_SOURCE_DIR}/Source)
+target_sources(objloader INTERFACE ${objloader_SOURCE_DIR}/Source/OBJ_Loader.h)
 
+add_library(stb_image INTERFACE)
+target_sources(stb_image INTERFACE ${stb_SOURCE_DIR}/stb_image.h)
+target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
 
 
 # ======================= Program =======================
 add_executable(WaterShader)
 
 target_sources(WaterShader PRIVATE
+    ${WaterShader_SOURCE_DIR}/src/utils/camera.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/camera.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/light.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/material.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/mesh.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/mesh.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/shader_program.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/shader_program.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/texture.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/texture.cpp
     ${WaterShader_SOURCE_DIR}/src/main.cpp
 )
 
@@ -82,5 +100,6 @@ target_link_libraries(WaterShader PRIVATE
     ${GLEW_LIBRARIES}
     glm
     objloader
+    stb_image
     imgui
 )
