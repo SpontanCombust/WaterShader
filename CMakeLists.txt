@@ -75,9 +75,9 @@ target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
 add_executable(WaterShader)
 
 target_sources(WaterShader PRIVATE
-    ${WaterShader_SOURCE_DIR}/src/utils/camera.hpp
-    ${WaterShader_SOURCE_DIR}/src/utils/camera.cpp
-    ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.hpp
+${WaterShader_SOURCE_DIR}/src/utils/camera.hpp
+${WaterShader_SOURCE_DIR}/src/utils/camera.cpp
+${WaterShader_SOURCE_DIR}/src/utils/framebuffer.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/light.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/material.hpp
@@ -85,8 +85,11 @@ target_sources(WaterShader PRIVATE
     ${WaterShader_SOURCE_DIR}/src/utils/mesh.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/shader_program.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/shader_program.cpp
-    ${WaterShader_SOURCE_DIR}/src/utils/texture.hpp
-    ${WaterShader_SOURCE_DIR}/src/utils/texture.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/stb_image.c
+    ${WaterShader_SOURCE_DIR}/src/utils/texture2d.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/texture2d.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/textureCube.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/textureCube.cpp
     ${WaterShader_SOURCE_DIR}/src/main.cpp
 )
 
