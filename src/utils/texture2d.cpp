@@ -1,43 +1,41 @@
-#include "texture.hpp"
+#include "texture2d.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
-#include "stb_image.h"
+#include <stb_image.h>
 
 #include <cstdio>
 
-Texture::Texture() 
+Texture2D::Texture2D() 
 {
     m_handle = 0;
     m_size = {0, 0};
 }
 
-Texture::~Texture() 
+Texture2D::~Texture2D() 
 {
     if(m_handle != 0) {
         glDeleteTextures(1, &m_handle);
     }
 }
 
-Texture::Texture(Texture&& other) 
+Texture2D::Texture2D(Texture2D&& other) 
 {
     m_handle = other.m_handle;
     other.m_handle = 0;
 }
 
-Texture& Texture::operator=(Texture&& other) 
+Texture2D& Texture2D::operator=(Texture2D&& other) 
 {
     m_handle = other.m_handle;
     other.m_handle = 0;
     return *this;
 }
 
-bool Texture::fromBlank(glm::ivec2 size, GLenum format) 
+bool Texture2D::fromBlank(glm::ivec2 size, GLenum format) 
 {
     return fromData(nullptr, size, format);
 }
 
-bool Texture::fromData(const void *data, glm::ivec2 size, GLenum format) 
+bool Texture2D::fromData(const void *data, glm::ivec2 size, GLenum format) 
 {
     if(m_handle != 0) {
         glDeleteTextures(1, &m_handle);
@@ -66,7 +64,7 @@ bool Texture::fromData(const void *data, glm::ivec2 size, GLenum format)
     return true;
 }
 
-bool Texture::fromFile(const char *imageFile) 
+bool Texture2D::fromFile(const char *imageFile) 
 {
     int channels;
     unsigned char *data = stbi_load(imageFile, &m_size.x, &m_size.y, &channels, 0);
@@ -95,22 +93,22 @@ bool Texture::fromFile(const char *imageFile)
     return result;
 }
 
-GLuint Texture::getHandle() const
+GLuint Texture2D::getHandle() const
 {
     return m_handle;
 }
 
-glm::ivec2 Texture::getSize() const
+glm::ivec2 Texture2D::getSize() const
 {
     return m_size;
 }
 
-void Texture::bind() const
+void Texture2D::bind() const
 {
     glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-void Texture::unbind() const
+void Texture2D::unbind() const
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }

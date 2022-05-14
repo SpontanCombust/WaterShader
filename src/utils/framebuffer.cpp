@@ -48,7 +48,7 @@ Framebuffer& Framebuffer::operator=(Framebuffer&& other)
     return *this;
 }
 
-bool Framebuffer::fromTarget(Texture *texture) 
+bool Framebuffer::fromTarget(Texture2D *texture) 
 {
     if(!texture || texture->getHandle() == 0) {
         printf("Target given for framebuffer is invalid\n");
@@ -93,7 +93,7 @@ bool Framebuffer::fromTarget(Texture *texture)
 
 bool Framebuffer::fromBlank(glm::ivec2 size) 
 {
-    Texture *cbo = new Texture();
+    Texture2D *cbo = new Texture2D();
     if(!cbo->fromBlank(size, GL_RGB)) {
         printf("Failed to create texture for framebuffer\n");
         delete cbo;

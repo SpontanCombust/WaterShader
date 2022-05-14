@@ -1,6 +1,6 @@
 #pragma once
 
-#include "texture.hpp"
+#include "texture2d.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,7 +10,7 @@ class Framebuffer
 {
 private:
     GLuint m_fbo, m_rbo;
-    Texture *m_ownedCbo;
+    Texture2D *m_ownedCbo;
     // cbo may also have the size, but we won't necessairly be using cbo 
     // for example when using this framebuffer as the default GL framebuffer
     glm::ivec2 m_size; 
@@ -28,7 +28,7 @@ public:
 
 
     // just remember to use the framebuffer beyond this texture's lifetime
-    bool fromTarget(Texture *texture);
+    bool fromTarget(Texture2D *texture);
     bool fromBlank(glm::ivec2 size);
     bool fromWindow(GLFWwindow *window); // to make a default GL framebuffer
 

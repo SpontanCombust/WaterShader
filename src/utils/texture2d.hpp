@@ -3,22 +3,22 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-class Texture
+class Texture2D
 {
 private:
     GLuint m_handle;
     glm::ivec2 m_size;
 
 public:
-    Texture();
-    ~Texture();
+    Texture2D();
+    ~Texture2D();
 
     // no copying, only move
-    Texture(Texture&& other);
-    Texture& operator=(Texture&& other);
+    Texture2D(Texture2D&& other);
+    Texture2D& operator=(Texture2D&& other);
 
-    Texture(const Texture& other) = delete;
-    Texture& operator=(const Texture& other) = delete;
+    Texture2D(const Texture2D& other) = delete;
+    Texture2D& operator=(const Texture2D& other) = delete;
 
 
     bool fromBlank(glm::ivec2 size, GLenum format);
