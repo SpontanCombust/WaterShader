@@ -1,8 +1,12 @@
 #pragma once
 
+#include "texture2d.hpp"
+
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include <memory>
+#include <string>
 #include <vector>
 
 
@@ -18,6 +22,9 @@ private:
     size_t m_iboSize;
     size_t m_iboCapacity;
 
+    std::string m_name;
+    std::shared_ptr<Texture2D> m_diffuseTexture;
+
 
 public:
     Mesh();
@@ -28,7 +35,10 @@ public:
               const std::vector<glm::vec2>& uvs,
               const std::vector<unsigned int>& indices);
 
-    bool load(const char *objPath);
+    void setName(const std::string& name);
+    const std::string& getName() const;
+    
+    void setDiffuseTexture(std::shared_ptr<Texture2D> texture);
 
     void draw() const;
 };

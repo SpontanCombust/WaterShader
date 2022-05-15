@@ -1,7 +1,5 @@
 #include "mesh.hpp"
 
-#include "OBJ_Loader.h"
-
 Mesh::Mesh()
 {
     glCreateBuffers(1, &m_vboVertices);
@@ -30,6 +28,8 @@ Mesh::Mesh()
     glBindVertexArray(0);
 
     m_iboSize = m_iboCapacity = 0;
+
+    m_diffuseTexture = nullptr;
 }
 
 Mesh::~Mesh()
@@ -88,32 +88,28 @@ bool Mesh::load(const std::vector<glm::vec3>& vertices,
     return true;
 }
 
-bool Mesh::load(const char *objPath)
+void Mesh::setName(const std::string& name) 
 {
-    objl::Loader loader;    
+    m_name = name;
+}
 
-    if(!loader.LoadFile(objPath))
-    {
-        printf("Failed to load mesh: %s\n", objPath);
-        return false;
-    }
+const std::string& Mesh::getName() const
+{
+    return m_name;
+}
 
-    std::vector<glm::vec3> vertices(loader.LoadedVertices.size());
-    std::vector<glm::vec3> normals(loader.LoadedVertices.size());
-    std::vector<glm::vec2> uvs(loader.LoadedVertices.size());
-
-    for(unsigned int i = 0; i < loader.LoadedVertices.size(); i++)
-    {
-        vertices[i] = glm::vec3(loader.LoadedVertices[i].Position.X, loader.LoadedVertices[i].Position.Y, loader.LoadedVertices[i].Position.Z);
-        normals[i] = glm::vec3(loader.LoadedVertices[i].Normal.X, loader.LoadedVertices[i].Normal.Y, loader.LoadedVertices[i].Normal.Z);
-        uvs[i] = glm::vec2(loader.LoadedVertices[i].TextureCoordinate.X, loader.LoadedVertices[i].TextureCoordinate.Y);
-    }
-
-    return load(vertices, normals, uvs, loader.LoadedIndices);
+void Mesh::setDiffuseTexture(std::shared_ptr<Texture2D> texture) 
+{
+    m_diffuseTexture = texture;
 }
 
 void Mesh::draw() const
 {
+    if(m_diffuseTexture) {
+        glActiveTexture(GL_TEXTURE0);
+        m_diffuseTexture->bind();
+    }
+
     glBindVertexArray(m_vao);
         glDrawElements(GL_TRIANGLES, m_iboSize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
