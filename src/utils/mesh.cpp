@@ -21,6 +21,7 @@ Mesh::Mesh()
 
         glBindBuffer(GL_ARRAY_BUFFER, m_vboUVs);
         glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
@@ -36,10 +37,64 @@ Mesh::~Mesh()
 {
     glDeleteBuffers(1, &m_vboVertices);
     glDeleteBuffers(1, &m_vboNormals);
-    // glDeleteBuffers(1, &m_vboUVs);
+    glDeleteBuffers(1, &m_vboUVs);
     glDeleteBuffers(1, &m_ibo);
     glDeleteVertexArrays(1, &m_vao);
 }
+
+Mesh::Mesh(Mesh&& other) 
+{
+    m_vboVertices = other.m_vboVertices;
+    m_vboNormals = other.m_vboNormals;
+    m_vboUVs = other.m_vboUVs;
+    m_ibo = other.m_ibo;
+    m_vao = other.m_vao;
+
+    m_iboSize = other.m_iboSize;
+    m_iboCapacity = other.m_iboCapacity;
+
+    m_name = std::move(other.m_name);
+    m_diffuseTexture = std::move(other.m_diffuseTexture);
+
+
+    other.m_vboVertices = 0;
+    other.m_vboNormals = 0;
+    other.m_vboUVs = 0;
+    other.m_ibo = 0;
+    other.m_vao = 0;
+
+    other.m_iboSize = other.m_iboCapacity = 0;
+    other.m_diffuseTexture = nullptr;
+}
+
+Mesh& Mesh::operator=(Mesh&& other) 
+{
+    m_vboVertices = other.m_vboVertices;
+    m_vboNormals = other.m_vboNormals;
+    m_vboUVs = other.m_vboUVs;
+    m_ibo = other.m_ibo;
+    m_vao = other.m_vao;
+
+    m_iboSize = other.m_iboSize;
+    m_iboCapacity = other.m_iboCapacity;
+
+    m_name = std::move(other.m_name);
+    m_diffuseTexture = std::move(other.m_diffuseTexture);
+
+
+    other.m_vboVertices = 0;
+    other.m_vboNormals = 0;
+    other.m_vboUVs = 0;
+    other.m_ibo = 0;
+    other.m_vao = 0;
+
+    other.m_iboSize = other.m_iboCapacity = 0;
+    other.m_diffuseTexture = nullptr;
+
+    return *this;
+}
+
+
 
 bool Mesh::load(const std::vector<glm::vec3>& vertices, 
                 const std::vector<glm::vec3>& normals,
