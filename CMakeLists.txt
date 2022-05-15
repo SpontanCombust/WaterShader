@@ -17,9 +17,9 @@ FetchContent_Declare(
     GIT_TAG 0.9.9.8
 )
 FetchContent_Declare(
-    objloader
-    GIT_REPOSITORY https://github.com/Bly7/OBJ-Loader
-    GIT_TAG 03b06bf50bca2953a0ccd2d2ba373b27f46eecf2
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp
+    GIT_TAG v5.2.3
 )
 FetchContent_Declare(
     stb
@@ -32,7 +32,15 @@ FetchContent_Declare(
     GIT_TAG v1.87
 )
 
-FetchContent_MakeAvailable(glfw glm objloader stb imgui)
+set(ASSIMP_BUILD_TESTS OFF)
+
+FetchContent_MakeAvailable(
+    glfw 
+    glm 
+    assimp
+    stb 
+    imgui
+)
 
 
 find_package(OpenGL REQUIRED)
@@ -62,10 +70,6 @@ target_link_libraries(imgui PRIVATE
     ${CMAKE_DL_LIBS}
 )
 
-add_library(objloader INTERFACE)
-target_include_directories(objloader INTERFACE ${objloader_SOURCE_DIR}/Source)
-target_sources(objloader INTERFACE ${objloader_SOURCE_DIR}/Source/OBJ_Loader.h)
-
 add_library(stb_image INTERFACE)
 target_sources(stb_image INTERFACE ${stb_SOURCE_DIR}/stb_image.h)
 target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
@@ -75,14 +79,18 @@ target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
 add_executable(WaterShader)
 
 target_sources(WaterShader PRIVATE
-${WaterShader_SOURCE_DIR}/src/utils/camera.hpp
-${WaterShader_SOURCE_DIR}/src/utils/camera.cpp
-${WaterShader_SOURCE_DIR}/src/utils/framebuffer.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/camera.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/camera.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/framebuffer.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/light.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/material.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/mesh_instance.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/mesh_instance.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/mesh.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/mesh.cpp
+    ${WaterShader_SOURCE_DIR}/src/utils/model.hpp
+    ${WaterShader_SOURCE_DIR}/src/utils/model.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/shader_program.hpp
     ${WaterShader_SOURCE_DIR}/src/utils/shader_program.cpp
     ${WaterShader_SOURCE_DIR}/src/utils/stb_image.c
@@ -102,7 +110,7 @@ target_link_libraries(WaterShader PRIVATE
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     glm
-    objloader
+    assimp
     stb_image
     imgui
 )
