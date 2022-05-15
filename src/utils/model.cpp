@@ -127,6 +127,8 @@ std::vector<MeshInstance> processNodes(const aiScene *scene, aiNode *node, const
                 // (aiMatrix4x4 should also have 16 floats) and then transposing the matrix
                 glm::mat4 transform = *(glm::mat4 *)&node->mTransformation;
                 inst.setTransform(glm::transpose(transform));
+
+                instances.push_back(inst);
             }
         }
 
