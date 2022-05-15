@@ -41,7 +41,7 @@ bool ShaderProgram::fromSources(const char *vertexShaderSource, const char *frag
 	int infoLogLength;
 
 	// Compile Vertex Shader
-	printf("Compiling vertex shader...\n");
+	// printf("Compiling vertex shader...\n");
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
 
@@ -60,7 +60,7 @@ bool ShaderProgram::fromSources(const char *vertexShaderSource, const char *frag
 
 
 	// Compile Fragment Shader
-	printf("Compiling fragment shader...\n");
+	// printf("Compiling fragment shader...\n");
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource , NULL);
 	glCompileShader(fragmentShader);
 
@@ -86,7 +86,7 @@ bool ShaderProgram::fromSources(const char *vertexShaderSource, const char *frag
 
 	m_handle = glCreateProgram();
 
-	printf("Linking program\n");
+	// printf("Linking program\n");
 	glAttachShader(m_handle, vertexShader);
 	glAttachShader(m_handle, fragmentShader);
 	glLinkProgram(m_handle);
@@ -119,6 +119,8 @@ bool ShaderProgram::fromSources(const char *vertexShaderSource, const char *frag
 
 bool ShaderProgram::fromFiles(const char *vertexShaderFile, const char *fragmentShaderFile) 
 {
+	printf("Loading shader program from files %s and %s\n", vertexShaderFile, fragmentShaderFile);
+
 	// Read the Vertex Shader code from the file
 	std::string vertexShaderCode;
 	std::ifstream vertexShaderStream(vertexShaderFile, std::ios::in);
