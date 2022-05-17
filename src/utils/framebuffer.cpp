@@ -137,3 +137,9 @@ void Framebuffer::bind() const
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     glViewport(0, 0, m_size.x, m_size.y);
 }
+
+const Texture2D* Framebuffer::getOwnedTarget() const
+{
+    return m_ownedCbo;
+}
+

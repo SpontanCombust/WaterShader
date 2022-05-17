@@ -34,4 +34,6 @@ public:
 
     void bind() const;
     // no unbind function as that would require remembering the previous FBO size
+
+    const Texture2D *getOwnedTarget() const;
 };

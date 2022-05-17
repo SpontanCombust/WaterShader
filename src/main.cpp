@@ -20,6 +20,8 @@ const unsigned int REFRACTION_HEIGHT = WIN_HEIGHT;
 const unsigned int REFLECTION_WIDTH = WIN_WIDTH / 4;
 const unsigned int REFLECTION_HEIGHT = WIN_HEIGHT / 4;
 
+const float WATER_HEIGHT = 0.f;
+
 
 int main()
 {
@@ -108,31 +110,38 @@ int main()
 
 
 
-    ShaderProgram meshProgram;
-    if(!meshProgram.fromFiles("../assets/shaders/phong_simple.vs.glsl", "../assets/shaders/phong_simple.fs.glsl"))
+    ShaderProgram terrainProgram;
+    if(!terrainProgram.fromFiles("../assets/shaders/phong_simple.vs.glsl", "../assets/shaders/phong_simple.fs.glsl"))
     {
         fprintf(stderr, "Failed to load simple mesh shader\n");
         glfwTerminate();
         return -3;
     }
 
-    GLint unifMeshModel = glGetUniformLocation(meshProgram.getHandle(), "uModel");
-    GLint unifMeshView = glGetUniformLocation(meshProgram.getHandle(), "uView");
-    GLint unifMeshProjection = glGetUniformLocation(meshProgram.getHandle(), "uProjection");
-    // GLint unifMeshCameraPos = glGetUniformLocation(meshProgram.getHandle(), "uCameraPosition");
-    GLint unifMeshLightDir = glGetUniformLocation(meshProgram.getHandle(), "uLight.direction");
-    GLint unifMeshLightAmbient = glGetUniformLocation(meshProgram.getHandle(), "uLight.ambient");
-    GLint unifMeshLightDiffuse = glGetUniformLocation(meshProgram.getHandle(), "uLight.diffuse");
-    // GLint unifMeshLightSpecular = glGetUniformLocation(meshProgram.getHandle(), "uLight.specular");
+    GLint unifTerrainModel = glGetUniformLocation(terrainProgram.getHandle(), "uModel");
+    GLint unifTerrainView = glGetUniformLocation(terrainProgram.getHandle(), "uView");
+    GLint unifTerrainProjection = glGetUniformLocation(terrainProgram.getHandle(), "uProjection");
+    // GLint unifTerrainCameraPos = glGetUniformLocation(terrainProgram.getHandle(), "uCameraPosition");
+    GLint unifTerrainLightDir = glGetUniformLocation(terrainProgram.getHandle(), "uLight.direction");
+    GLint unifTerrainLightAmbient = glGetUniformLocation(terrainProgram.getHandle(), "uLight.ambient");
+    GLint unifTerrainLightDiffuse = glGetUniformLocation(terrainProgram.getHandle(), "uLight.diffuse");
+    // GLint unifTerrainLightSpecular = glGetUniformLocation(terrainProgram.getHandle(), "uLight.specular");
     
 
-    // ShaderProgram waterProgram;
-    // if(!meshProgram.fromFiles("../assets/shaders/water.vs.glsl", "../assets/shaders/water.fs.glsl"))
-    // {
-    //     fprintf(stderr, "Failed to load water shader\n");
-    //     glfwTerminate();
-    //     return -3;
-    // }
+    ShaderProgram waterProgram;
+    if(!waterProgram.fromFiles("../assets/shaders/water.vs.glsl", "../assets/shaders/water.fs.glsl"))
+    {
+        fprintf(stderr, "Failed to load water shader\n");
+        glfwTerminate();
+        return -3;
+    }
+
+    GLint unifWaterModel = glGetUniformLocation(waterProgram.getHandle(), "uModel");
+    GLint unifWaterView = glGetUniformLocation(waterProgram.getHandle(), "uView");
+    GLint unifWaterProjection = glGetUniformLocation(waterProgram.getHandle(), "uProjection");
+    GLint unifWaterCameraPosition = glGetUniformLocation(waterProgram.getHandle(), "uCameraPosition");
+    GLint unifWaterTextureRefraction = glGetUniformLocation(waterProgram.getHandle(), "uTextureRefraction");
+    GLint unifWaterTextureReflection = glGetUniformLocation(waterProgram.getHandle(), "uTextureReflection");
 
 
     ShaderProgram skyboxProgram;
@@ -179,21 +188,55 @@ int main()
 
 
 
+
+        glEnable(GL_CULL_FACE);
+        terrainProgram.bind();
+        glUniformMatrix4fv(unifTerrainModel, 1, GL_FALSE, glm::value_ptr(terrainMesh.getTransform()));
+        glUniformMatrix4fv(unifTerrainProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
+        glUniform3fv(unifTerrainLightDir, 1, glm::value_ptr(glm::vec3(1.0f, -1.0f, -1.0f)));
+        glUniform3fv(unifTerrainLightAmbient, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
+        glUniform3fv(unifTerrainLightDiffuse, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.8f)));
+
+
+        float dist = 2 * (camera.getPosition().y - WATER_HEIGHT);
+        camera.setPosition(camera.getPosition() - glm::vec3(0.f, dist, 0.f));
+        camera.setRotation(camera.getYaw(), -camera.getPitch());
+
+        glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
+        reflectionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // glEnable(GL_CULL_FACE);
-        meshProgram.bind();
-        glUniformMatrix4fv(unifMeshView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
-        glUniformMatrix4fv(unifMeshProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
-        glUniform3fv(unifMeshLightDir, 1, glm::value_ptr(glm::vec3(1.0f, -1.0f, -1.0f)));
-        glUniform3fv(unifMeshLightAmbient, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
-        glUniform3fv(unifMeshLightDiffuse, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.8f)));
-
-        glUniformMatrix4fv(unifMeshModel, 1, GL_FALSE, glm::value_ptr(terrainMesh.getTransform()));
         terrainMesh.draw();
 
-        glUniformMatrix4fv(unifMeshModel, 1, GL_FALSE, glm::value_ptr(waterMesh.getTransform()));
+        camera.setPosition(camera.getPosition() + glm::vec3(0.f, dist, 0.f));
+        camera.setRotation(camera.getYaw(), -camera.getPitch());
+
+
+        glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
+        refractionFramebuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        terrainMesh.draw();
+
+
+
+        windowFramebuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        terrainProgram.bind();
+        terrainMesh.draw();
+
+        waterProgram.bind();
+        glUniformMatrix4fv(unifWaterModel, 1, GL_FALSE, glm::value_ptr(waterMesh.getTransform()));
+        glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
+        glUniformMatrix4fv(unifWaterProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
+        glUniform3fv(unifWaterCameraPosition, 1, glm::value_ptr(camera.getPosition()));
+        glUniform1i(unifWaterTextureRefraction, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, refractionFramebuffer.getOwnedTarget()->getHandle());
+        glUniform1i(unifWaterTextureReflection, 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, reflectionFramebuffer.getOwnedTarget()->getHandle());
         waterMesh.draw();
+
 
 
         glDisable(GL_CULL_FACE);
