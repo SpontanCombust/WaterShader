@@ -20,7 +20,7 @@ const unsigned int REFRACTION_HEIGHT = WIN_HEIGHT;
 const unsigned int REFLECTION_WIDTH = WIN_WIDTH / 4;
 const unsigned int REFLECTION_HEIGHT = WIN_HEIGHT / 4;
 
-const float WATER_HEIGHT = 0.f;
+const float WATER_HEIGHT = -0.10f;
 const float WATER_WAVE_SPEED = 0.008f;
 
 
@@ -56,7 +56,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL); 
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 
 
 
@@ -217,12 +217,12 @@ int main()
         glUniformMatrix4fv(unifSkyboxProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
 
         auto drawTerrainAndSky = [&] {
-            glEnable(GL_CULL_FACE);
+            // glEnable(GL_CULL_FACE);
             terrainProgram.bind();
             glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
             terrainMesh.draw();
 
-            glDisable(GL_CULL_FACE);
+            // glDisable(GL_CULL_FACE);
             skyboxProgram.bind();
             auto viewNoTranslation = glm::mat4(glm::mat3(camera.getView()));
             glUniformMatrix4fv(unifSkyboxView, 1, GL_FALSE, glm::value_ptr(viewNoTranslation));
@@ -235,6 +235,7 @@ int main()
         float dist = 2 * (camera.getPosition().y - WATER_HEIGHT);
         camera.setPosition(camera.getPosition() - glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
+        camera.update();
 
         reflectionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -242,6 +243,7 @@ int main()
 
         camera.setPosition(camera.getPosition() + glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
+        camera.update();
 
 
         // refraction pass
@@ -255,7 +257,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         drawTerrainAndSky();
 
-        glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         waterProgram.bind();
         glUniformMatrix4fv(unifWaterModel, 1, GL_FALSE, glm::value_ptr(waterMesh.getTransform()));
         glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));

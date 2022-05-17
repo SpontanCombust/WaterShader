@@ -3,7 +3,7 @@
 // ============= OUT ==============
 out VS_OUT {
     vec3 positionModelspace;
-    vec4 positionScreenspace;
+    vec4 positionClipspace;
     vec3 normal;
     vec2 uv;
 } vs_out;
@@ -25,10 +25,10 @@ uniform mat4 uProjection;
 void main()
 {
     vs_out.positionModelspace = vec3(uModel * vec4(avPosition, 1.0));
-    vs_out.positionScreenspace = uProjection * uView * uModel * vec4(avPosition, 1.0);
-	vs_out.normal = avNormal;
+    vs_out.positionClipspace = uProjection * uView * uModel * vec4(avPosition, 1.0);
+    vs_out.normal = mat3(transpose(inverse(uModel))) * avNormal;
 	vs_out.uv = avUV;
 
-	gl_Position = vs_out.positionScreenspace;
+	gl_Position = vs_out.positionClipspace;
 }
 // ================================

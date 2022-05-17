@@ -8,7 +8,7 @@ out vec4 fs_out_FragColor;
 // ============= IN ===============
 in VS_OUT {
     vec3 positionModelspace;
-	vec4 positionScreenspace;
+	vec4 positionClipspace;
 	vec3 normal;
 	vec2 uv;
 } fs_in;
@@ -19,14 +19,14 @@ uniform sampler2D uTextureReflection;
 uniform sampler2D uDUDV;
 uniform float uWaveMovement;
 
-const float WAVE_STRENGTH = 0.05;
+const float WAVE_STRENGTH = 0.01;
 // ================================
 
 
 // ============= CODE =============
 void main()
 {
-    vec2 ndc = (fs_in.positionScreenspace.xy / fs_in.positionScreenspace.w) / 2.0 + 0.5;
+    vec2 ndc = (fs_in.positionClipspace.xy / fs_in.positionClipspace.w) / 2.0 + 0.5;
     vec2 refractUV = vec2(ndc.x, ndc.y);
     vec2 reflectUV = vec2(ndc.x, -ndc.y);
 
@@ -42,8 +42,9 @@ void main()
 
     vec3 cameraDir = normalize(uCameraPosition - fs_in.positionModelspace);
     float fresnel = max(dot(cameraDir, normalize(fs_in.normal)), 0.0);
-    fresnel = pow(fresnel, 4.0);
+    fresnel = pow(fresnel, 2.0);
 
-    fs_out_FragColor = mix(reflectColor, refractColor, fresnel);
+    vec3 blueTint = vec3(0.0, 0.05, 0.15);
+    fs_out_FragColor = mix(reflectColor, refractColor, fresnel) + vec4(blueTint, 1.0);
 }
 // ================================
