@@ -21,6 +21,7 @@ const unsigned int REFLECTION_WIDTH = WIN_WIDTH / 4;
 const unsigned int REFLECTION_HEIGHT = WIN_HEIGHT / 4;
 
 const float WATER_HEIGHT = 0.f;
+const float WATER_WAVE_SPEED = 0.008f;
 
 
 int main()
@@ -82,6 +83,10 @@ int main()
         }
     );
 
+    auto dudv = std::make_shared<Texture2D>();
+    dudv->fromFile("../assets/textures/dudv.jpg");
+
+
     const char * skyboxFaces[6] = {
         "../assets/textures/skybox/right.jpg",
         "../assets/textures/skybox/left.jpg",
@@ -142,10 +147,15 @@ int main()
     GLint unifWaterCameraPosition = glGetUniformLocation(waterProgram.getHandle(), "uCameraPosition");
     GLint unifWaterTextureRefraction = glGetUniformLocation(waterProgram.getHandle(), "uTextureRefraction");
     GLint unifWaterTextureReflection = glGetUniformLocation(waterProgram.getHandle(), "uTextureReflection");
+    GLint unifWaterTextureDUDV = glGetUniformLocation(waterProgram.getHandle(), "uDUDV");
+    GLint unifWaterWaveMovement = glGetUniformLocation(waterProgram.getHandle(), "uWaveMovement");
+
+    float waveMovement = 0.f;
 
     waterProgram.bind();
     glUniform1i(unifWaterTextureRefraction, 0);
     glUniform1i(unifWaterTextureReflection, 1);
+    glUniform1i(unifWaterTextureDUDV, 2);
 
 
     ShaderProgram skyboxProgram;
@@ -168,6 +178,7 @@ int main()
 
     waterMesh.getMesh()->setTexture(0, refractionFramebuffer.getOwnedTarget());
     waterMesh.getMesh()->setTexture(1, reflectionFramebuffer.getOwnedTarget());
+    waterMesh.getMesh()->setTexture(2, dudv);
 
 
 
@@ -183,6 +194,7 @@ int main()
     {
         currTime = glfwGetTime();
         double dt = currTime - prevTime;
+        waveMovement = std::fmod(waveMovement + WATER_WAVE_SPEED * dt, 1.f);
 
         glfwPollEvents();
 
@@ -198,7 +210,7 @@ int main()
         terrainProgram.bind();
         glUniformMatrix4fv(unifTerrainModel, 1, GL_FALSE, glm::value_ptr(terrainMesh.getTransform()));
         glUniformMatrix4fv(unifTerrainProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
-        glUniform3fv(unifTerrainLightDir, 1, glm::value_ptr(glm::vec3(1.0f, -1.0f, -1.0f)));
+        glUniform3fv(unifTerrainLightDir, 1, glm::value_ptr(glm::vec3(-1.0f, -0.5f, 0.2f)));
         glUniform3fv(unifTerrainLightAmbient, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
         glUniform3fv(unifTerrainLightDiffuse, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.8f)));
         skyboxProgram.bind();
@@ -249,6 +261,7 @@ int main()
         glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
         glUniformMatrix4fv(unifWaterProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
         glUniform3fv(unifWaterCameraPosition, 1, glm::value_ptr(camera.getPosition()));
+        glUniform1f(unifWaterWaveMovement, waveMovement);
         waterMesh.draw();
 
 
