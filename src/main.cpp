@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "utils/camera.hpp"
 #include "utils/shader_program.hpp"
@@ -10,6 +13,9 @@
 
 #include <algorithm>
 #include <cstdio>
+
+namespace imgui = ImGui;
+
 
 // settings
 const unsigned int WIN_WIDTH = 1280;
@@ -21,8 +27,6 @@ const unsigned int REFLECTION_WIDTH = WIN_WIDTH / 4;
 const unsigned int REFLECTION_HEIGHT = WIN_HEIGHT / 4;
 
 const float WATER_HEIGHT = -0.10f;
-const float WATER_WAVE_SPEED = 0.008f;
-
 
 int main()
 {
@@ -57,6 +61,14 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL); 
 	// glEnable(GL_CULL_FACE);
+
+
+    imgui::CreateContext();
+    imgui::StyleColorsDark();
+    ImGuiIO& io = imgui::GetIO(); (void)io;
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+    imgui::StyleColorsDark();
 
 
 
@@ -148,9 +160,16 @@ int main()
     GLint unifWaterTextureRefraction = glGetUniformLocation(waterProgram.getHandle(), "uTextureRefraction");
     GLint unifWaterTextureReflection = glGetUniformLocation(waterProgram.getHandle(), "uTextureReflection");
     GLint unifWaterTextureDUDV = glGetUniformLocation(waterProgram.getHandle(), "uDUDV");
+    GLint unifWaterWaveStrength = glGetUniformLocation(waterProgram.getHandle(), "uWaveStrength");
     GLint unifWaterWaveMovement = glGetUniformLocation(waterProgram.getHandle(), "uWaveMovement");
+    GLint unifWaterReflecivity = glGetUniformLocation(waterProgram.getHandle(), "uReflecivity");
+    GLint unifWaterTint = glGetUniformLocation(waterProgram.getHandle(), "uTint");
 
     float waveMovement = 0.f;
+    float waterWaveSpeed = 0.008f;
+    float waveStrength = 0.01f;
+    float waterReflecivity = 2.f;
+    glm::vec4 waterTint(0.f, 0.05, 0.15f, 1.f);
 
     waterProgram.bind();
     glUniform1i(unifWaterTextureRefraction, 0);
@@ -181,11 +200,9 @@ int main()
     waterMesh.getMesh()->setTexture(2, dudv);
 
 
-
     
     Camera camera;
     camera.setPosition({ 0.0f, 2.0f, 2.0f });
-
 
 
     double prevTime, currTime;
@@ -194,7 +211,7 @@ int main()
     {
         currTime = glfwGetTime();
         double dt = currTime - prevTime;
-        waveMovement = std::fmod(waveMovement + WATER_WAVE_SPEED * dt, 1.f);
+        waveMovement = std::fmod(waveMovement + waterWaveSpeed * dt, 1.f);
 
         glfwPollEvents();
 
@@ -204,6 +221,22 @@ int main()
 
         camera.handleInput(window, dt);
         camera.update();
+
+
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        imgui::NewFrame();
+        imgui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        {
+            imgui::SliderFloat("Water wave strength", &waveStrength, 0.f, 0.5f);
+            imgui::SliderFloat("Water wave speed", &waterWaveSpeed, 0.f, 0.2f);
+            imgui::SliderFloat("Water reflecivity", &waterReflecivity, 0.f, 8.f);
+            imgui::ColorEdit4("Water tint", glm::value_ptr(waterTint));
+        }
+        imgui::End();
+        imgui::Render();
+
 
 
         // setup terrain & sky constants
@@ -263,12 +296,16 @@ int main()
         glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
         glUniformMatrix4fv(unifWaterProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
         glUniform3fv(unifWaterCameraPosition, 1, glm::value_ptr(camera.getPosition()));
+        glUniform1f(unifWaterWaveStrength, waveStrength);
         glUniform1f(unifWaterWaveMovement, waveMovement);
+        glUniform1f(unifWaterReflecivity, waterReflecivity);
+        glUniform4fv(unifWaterTint, 1, glm::value_ptr(waterTint));
         waterMesh.draw();
 
 
 
         prevTime = currTime;
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
 
