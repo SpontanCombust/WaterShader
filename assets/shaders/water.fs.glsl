@@ -31,6 +31,7 @@ void main()
 
     vec3 cameraDir = normalize(uCameraPosition - fs_in.positionModelspace);
     float fresnel = max(dot(cameraDir, normalize(fs_in.normal)), 0.0);
+    fresnel = pow(fresnel, 4.0);
 
     fs_out_FragColor = mix(reflectColor, refractColor, fresnel);
 }

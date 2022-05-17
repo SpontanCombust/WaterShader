@@ -6,11 +6,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include <memory>
+
+
 class Framebuffer
 {
 private:
     GLuint m_fbo, m_rbo;
-    Texture2D *m_ownedCbo;
+    std::shared_ptr<Texture2D> m_ownedCbo;
     // cbo may also have the size, but we won't necessairly be using cbo 
     // for example when using this framebuffer as the default GL framebuffer
     glm::ivec2 m_size; 
@@ -35,5 +38,5 @@ public:
     void bind() const;
     // no unbind function as that would require remembering the previous FBO size
 
-    const Texture2D *getOwnedTarget() const;
+    const std::shared_ptr<Texture2D>& getOwnedTarget() const;
 };

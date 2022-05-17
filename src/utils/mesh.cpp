@@ -30,7 +30,7 @@ Mesh::Mesh()
 
     m_iboSize = m_iboCapacity = 0;
 
-    m_diffuseTexture = nullptr;
+    m_textures.clear();
 }
 
 Mesh::~Mesh()
@@ -54,7 +54,7 @@ Mesh::Mesh(Mesh&& other)
     m_iboCapacity = other.m_iboCapacity;
 
     m_name = std::move(other.m_name);
-    m_diffuseTexture = std::move(other.m_diffuseTexture);
+    m_textures = std::move(other.m_textures);
 
 
     other.m_vboVertices = 0;
@@ -64,7 +64,7 @@ Mesh::Mesh(Mesh&& other)
     other.m_vao = 0;
 
     other.m_iboSize = other.m_iboCapacity = 0;
-    other.m_diffuseTexture = nullptr;
+    other.m_textures.clear();
 }
 
 Mesh& Mesh::operator=(Mesh&& other) 
@@ -79,7 +79,7 @@ Mesh& Mesh::operator=(Mesh&& other)
     m_iboCapacity = other.m_iboCapacity;
 
     m_name = std::move(other.m_name);
-    m_diffuseTexture = std::move(other.m_diffuseTexture);
+    m_textures = std::move(other.m_textures);
 
 
     other.m_vboVertices = 0;
@@ -89,7 +89,7 @@ Mesh& Mesh::operator=(Mesh&& other)
     other.m_vao = 0;
 
     other.m_iboSize = other.m_iboCapacity = 0;
-    other.m_diffuseTexture = nullptr;
+    other.m_textures.clear();
 
     return *this;
 }
@@ -153,20 +153,28 @@ const std::string& Mesh::getName() const
     return m_name;
 }
 
-void Mesh::setDiffuseTexture(std::shared_ptr<Texture2D> texture) 
+void Mesh::setTexture(unsigned char i, std::shared_ptr<Texture2D> texture) 
 {
-    m_diffuseTexture = texture;
+    if(m_textures.size() <= i)
+    {
+        m_textures.resize(i + 1);
+    }
+
+    m_textures[i] = texture;
 }
 
 void Mesh::draw() const
 {
-    glActiveTexture(GL_TEXTURE0);
-    if(m_diffuseTexture) {
-        m_diffuseTexture->bind();
-    } else {
-        glBindTexture(GL_TEXTURE_2D, 0);
+    for (unsigned char i = 0; i < m_textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        if(m_textures[i]) {
+            m_textures[i]->bind();
+        } else {
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
     }
-
+    
     glBindVertexArray(m_vao);
         glDrawElements(GL_TRIANGLES, m_iboSize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);

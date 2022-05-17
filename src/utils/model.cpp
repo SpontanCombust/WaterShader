@@ -92,7 +92,7 @@ std::vector<std::shared_ptr<Mesh>> processMeshes(const aiScene *scene)
         Mesh convertedMesh;
         if(convertedMesh.load(vertices, normals, uvs, indices))
         {
-            convertedMesh.setDiffuseTexture(textures[mesh->mMaterialIndex]);
+            convertedMesh.setTexture(0, textures[mesh->mMaterialIndex]);
             convertedMesh.setName(mesh->mName.C_Str());
             meshes[i] = std::make_shared<Mesh>(std::move(convertedMesh));
         }

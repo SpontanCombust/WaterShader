@@ -26,6 +26,11 @@ const std::string& MeshInstance::getName() const
     return m_name;
 }
 
+const std::shared_ptr<Mesh>& MeshInstance::getMesh() const
+{
+    return m_mesh;
+}
+
 void MeshInstance::draw() const
 {
     m_mesh->draw();

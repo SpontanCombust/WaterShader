@@ -143,6 +143,10 @@ int main()
     GLint unifWaterTextureRefraction = glGetUniformLocation(waterProgram.getHandle(), "uTextureRefraction");
     GLint unifWaterTextureReflection = glGetUniformLocation(waterProgram.getHandle(), "uTextureReflection");
 
+    waterProgram.bind();
+    glUniform1i(unifWaterTextureRefraction, 0);
+    glUniform1i(unifWaterTextureReflection, 1);
+
 
     ShaderProgram skyboxProgram;
     if(!skyboxProgram.fromFiles("../assets/shaders/skybox.vs.glsl", "../assets/shaders/skybox.fs.glsl"))
@@ -162,11 +166,14 @@ int main()
     Framebuffer reflectionFramebuffer;
     reflectionFramebuffer.fromBlank({ REFLECTION_WIDTH, REFLECTION_HEIGHT });
 
+    waterMesh.getMesh()->setTexture(0, refractionFramebuffer.getOwnedTarget());
+    waterMesh.getMesh()->setTexture(1, reflectionFramebuffer.getOwnedTarget());
+
 
 
     
     Camera camera;
-
+    camera.setPosition({ 0.0f, 2.0f, 2.0f });
 
 
 
@@ -212,7 +219,7 @@ int main()
         };
 
 
-        // reflection pass
+        //reflection pass
         float dist = 2 * (camera.getPosition().y - WATER_HEIGHT);
         camera.setPosition(camera.getPosition() - glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
@@ -242,12 +249,6 @@ int main()
         glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
         glUniformMatrix4fv(unifWaterProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
         glUniform3fv(unifWaterCameraPosition, 1, glm::value_ptr(camera.getPosition()));
-        glUniform1i(unifWaterTextureRefraction, 0);
-        glUniform1i(unifWaterTextureReflection, 1);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, refractionFramebuffer.getOwnedTarget()->getHandle());
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, reflectionFramebuffer.getOwnedTarget()->getHandle());
         waterMesh.draw();
 
 

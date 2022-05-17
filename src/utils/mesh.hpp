@@ -23,7 +23,7 @@ private:
     size_t m_iboCapacity;
 
     std::string m_name;
-    std::shared_ptr<Texture2D> m_diffuseTexture;
+    std::vector<std::shared_ptr<Texture2D>> m_textures;
 
 
 public:
@@ -46,7 +46,7 @@ public:
     void setName(const std::string& name);
     const std::string& getName() const;
     
-    void setDiffuseTexture(std::shared_ptr<Texture2D> texture);
+    void setTexture(unsigned char i, std::shared_ptr<Texture2D> texture);
 
     void draw() const;
 };

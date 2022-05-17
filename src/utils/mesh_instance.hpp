@@ -24,5 +24,7 @@ public:
     void setTransform(glm::mat4 transform);
     const glm::mat4& getTransform() const;
 
+    const std::shared_ptr<Mesh>& getMesh() const;    
+
     void draw() const;
 };

@@ -13,7 +13,7 @@ Framebuffer::Framebuffer()
 Framebuffer::~Framebuffer() 
 {
     if(m_ownedCbo) {
-        delete m_ownedCbo;
+        m_ownedCbo = nullptr;
     }
     // FBO and RBO are always created together, so we can only check one of them
     if(m_fbo != 0) {
@@ -60,7 +60,6 @@ bool Framebuffer::fromTarget(Texture2D *texture)
         glDeleteFramebuffers(1, &m_fbo);
     }
     if(m_ownedCbo) {
-        delete m_ownedCbo;
         m_ownedCbo = nullptr;
     }
 
@@ -106,7 +105,7 @@ bool Framebuffer::fromBlank(glm::ivec2 size)
         return false;
     }
 
-    m_ownedCbo = cbo;
+    m_ownedCbo = std::shared_ptr<Texture2D>(cbo);
 
     return true;
 }
@@ -122,7 +121,6 @@ bool Framebuffer::fromWindow(GLFWwindow *window)
         glDeleteFramebuffers(1, &m_fbo);
     }
     if(m_ownedCbo) {
-        delete m_ownedCbo;
         m_ownedCbo = nullptr;
     }
 
@@ -138,7 +136,7 @@ void Framebuffer::bind() const
     glViewport(0, 0, m_size.x, m_size.y);
 }
 
-const Texture2D* Framebuffer::getOwnedTarget() const
+const std::shared_ptr<Texture2D>& Framebuffer::getOwnedTarget() const
 {
     return m_ownedCbo;
 }
