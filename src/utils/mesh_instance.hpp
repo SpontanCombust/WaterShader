@@ -22,6 +22,7 @@ public:
     const std::string& getName() const;
 
     void setTransform(glm::mat4 transform);
+    const glm::mat4& getTransform() const;
 
     void draw() const;
 };

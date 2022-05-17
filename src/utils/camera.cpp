@@ -62,8 +62,12 @@ void Camera::handleInput(GLFWwindow *window, float deltaTime)
         m_position += m_right * CAMERA_MOVE_SPEED * deltaTime;
     }
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        m_isRotationActive = !m_isRotationActive;
-        glfwSetInputMode(window, GLFW_CURSOR, m_isRotationActive ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);   
+        m_isRotationActive = false;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);   
+    }
+    if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        m_isRotationActive = true;
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);   
     }
 
     static glm::dvec2 lastMousePos = getMousePosition(); // this initialization will be done only once

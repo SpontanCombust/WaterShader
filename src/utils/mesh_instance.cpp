@@ -11,6 +11,11 @@ void MeshInstance::setTransform(glm::mat4 transform)
     m_transform = transform;
 }
 
+const glm::mat4& MeshInstance::getTransform() const
+{
+    return m_transform;
+}
+
 void MeshInstance::setName(const std::string& name) 
 {
     m_name = name;

@@ -160,9 +160,11 @@ void Mesh::setDiffuseTexture(std::shared_ptr<Texture2D> texture)
 
 void Mesh::draw() const
 {
+    glActiveTexture(GL_TEXTURE0);
     if(m_diffuseTexture) {
-        glActiveTexture(GL_TEXTURE0);
         m_diffuseTexture->bind();
+    } else {
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     glBindVertexArray(m_vao);

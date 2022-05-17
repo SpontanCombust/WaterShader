@@ -3,6 +3,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <cassert>
 #include <cstdio>
@@ -16,7 +17,7 @@ std::vector<std::shared_ptr<Texture2D>> processMaterials(const aiScene *scene)
     {
         aiMaterial *mat = scene->mMaterials[i];
         aiString path;
-        if(mat->GetTexture(aiTextureType_DIFFUSE, 0, &path) > 0) 
+        if(mat->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) 
         {
             Texture2D texture;
             if(const aiTexture *embedded = scene->GetEmbeddedTexture(path.C_Str())) 
@@ -75,16 +76,16 @@ std::vector<std::shared_ptr<Mesh>> processMeshes(const aiScene *scene)
         std::memcpy(&vertices[0], (void *)mesh->mVertices, numVertices * sizeof(glm::vec3));
         std::memcpy(&normals[0], (void *)mesh->mNormals, numVertices * sizeof(glm::vec3));
 
-        for (size_t i = 0; i < numVertices; i++)
+        for (size_t j = 0; j < numVertices; j++)
         {
-            uvs[i] = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+            uvs[j] = glm::vec2(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y);
         }
         
-        for (size_t i = 0; i < mesh->mNumFaces; i++)
+        for (size_t j = 0; j < mesh->mNumFaces; j++)
         {
-            indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
-            indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
-            indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
+            indices[j * 3 + 0] = mesh->mFaces[j].mIndices[0];
+            indices[j * 3 + 1] = mesh->mFaces[j].mIndices[1];
+            indices[j * 3 + 2] = mesh->mFaces[j].mIndices[2];
         }
 
 
@@ -125,8 +126,11 @@ std::vector<MeshInstance> processNodes(const aiScene *scene, aiNode *node, const
                 // Assimp's matrices are row-major whereas glm's are column major
                 // We can quickly convert it to CM by reinterpreting the data under it
                 // (aiMatrix4x4 should also have 16 floats) and then transposing the matrix
-                glm::mat4 transform = *(glm::mat4 *)&node->mTransformation;
-                inst.setTransform(glm::transpose(transform));
+                glm::mat4 transform;
+                transform = *(glm::mat4 *)&node->mTransformation;
+                transform = glm::transpose(transform);
+                // transform = transform * glm::scale(glm::mat4(), glm::vec3(0.1f, 0.1f, 0.1f));
+                inst.setTransform(transform);
 
                 instances.push_back(inst);
             }
