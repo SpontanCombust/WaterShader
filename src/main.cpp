@@ -187,65 +187,69 @@ int main()
         camera.update();
 
 
-
-
-        glEnable(GL_CULL_FACE);
+        // setup terrain & sky constants
         terrainProgram.bind();
         glUniformMatrix4fv(unifTerrainModel, 1, GL_FALSE, glm::value_ptr(terrainMesh.getTransform()));
         glUniformMatrix4fv(unifTerrainProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
         glUniform3fv(unifTerrainLightDir, 1, glm::value_ptr(glm::vec3(1.0f, -1.0f, -1.0f)));
         glUniform3fv(unifTerrainLightAmbient, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
         glUniform3fv(unifTerrainLightDiffuse, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.8f)));
+        skyboxProgram.bind();
+        glUniformMatrix4fv(unifSkyboxProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
+
+        auto drawTerrainAndSky = [&] {
+            glEnable(GL_CULL_FACE);
+            terrainProgram.bind();
+            glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
+            terrainMesh.draw();
+
+            glDisable(GL_CULL_FACE);
+            skyboxProgram.bind();
+            auto viewNoTranslation = glm::mat4(glm::mat3(camera.getView()));
+            glUniformMatrix4fv(unifSkyboxView, 1, GL_FALSE, glm::value_ptr(viewNoTranslation));
+            skybox.bind();
+            cubeModel.m_meshes[0]->draw();
+        };
 
 
+        // reflection pass
         float dist = 2 * (camera.getPosition().y - WATER_HEIGHT);
         camera.setPosition(camera.getPosition() - glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
 
-        glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
         reflectionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        terrainMesh.draw();
+        drawTerrainAndSky();
 
         camera.setPosition(camera.getPosition() + glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
 
 
-        glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
+        // refraction pass
         refractionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        terrainMesh.draw();
+        drawTerrainAndSky();
 
 
-
+        // water pass
         windowFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        drawTerrainAndSky();
 
-        terrainProgram.bind();
-        terrainMesh.draw();
-
+        glEnable(GL_CULL_FACE);
         waterProgram.bind();
         glUniformMatrix4fv(unifWaterModel, 1, GL_FALSE, glm::value_ptr(waterMesh.getTransform()));
         glUniformMatrix4fv(unifWaterView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
         glUniformMatrix4fv(unifWaterProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
         glUniform3fv(unifWaterCameraPosition, 1, glm::value_ptr(camera.getPosition()));
         glUniform1i(unifWaterTextureRefraction, 0);
+        glUniform1i(unifWaterTextureReflection, 1);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, refractionFramebuffer.getOwnedTarget()->getHandle());
-        glUniform1i(unifWaterTextureReflection, 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, reflectionFramebuffer.getOwnedTarget()->getHandle());
         waterMesh.draw();
 
-
-
-        glDisable(GL_CULL_FACE);
-        skyboxProgram.bind();
-        auto viewNoTranslation = glm::mat4(glm::mat3(camera.getView()));
-        glUniformMatrix4fv(unifSkyboxView, 1, GL_FALSE, glm::value_ptr(viewNoTranslation));
-        glUniformMatrix4fv(unifSkyboxProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
-        skybox.bind();
-        cubeModel.m_meshes[0]->draw();
 
 
         prevTime = currTime;
