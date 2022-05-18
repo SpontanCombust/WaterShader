@@ -35,8 +35,14 @@ void main()
     vec2 dudvCoords2 = vec2(-fs_in.uv.x, fs_in.uv.y + 0.1) + vec2(uWaveMovement * 0.5, uWaveMovement);
     vec2 distortion1 = (texture(uDUDV, dudvCoords1).rg * 2.0 - 1.0) * uWaveStrength;
     vec2 distortion2 = (texture(uDUDV, dudvCoords2).rg * 2.0 - 1.0) * uWaveStrength;
+    
     refractUV += distortion1 + distortion2;
     reflectUV += distortion1 + distortion2;
+    refractUV.x = clamp(refractUV.x, 0.001, 0.999);
+    refractUV.y = clamp(refractUV.y, 0.001, 0.999);
+    reflectUV.x = clamp(reflectUV.x, 0.001, 0.999);
+    reflectUV.y = clamp(reflectUV.y, -0.999, -0.001);
+    
 
     vec4 refractColor = texture(uTextureRefraction, refractUV);
     vec4 reflectColor = texture(uTextureReflection, reflectUV);
