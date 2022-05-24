@@ -26,7 +26,7 @@ const unsigned int REFRACTION_HEIGHT = WIN_HEIGHT;
 const unsigned int REFLECTION_WIDTH = WIN_WIDTH / 4;
 const unsigned int REFLECTION_HEIGHT = WIN_HEIGHT / 4;
 
-const float WATER_HEIGHT = -0.10f;
+const float WATER_HEIGHT = 0.0f;
 
 int main()
 {
@@ -60,7 +60,6 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL); 
-	// glEnable(GL_CULL_FACE);
 
 
     imgui::CreateContext();
@@ -143,6 +142,7 @@ int main()
     GLint unifTerrainLightAmbient = glGetUniformLocation(terrainProgram.getHandle(), "uLight.ambient");
     GLint unifTerrainLightDiffuse = glGetUniformLocation(terrainProgram.getHandle(), "uLight.diffuse");
     // GLint unifTerrainLightSpecular = glGetUniformLocation(terrainProgram.getHandle(), "uLight.specular");
+    GLint unifTerrainClipPlane = glGetUniformLocation(terrainProgram.getHandle(), "uClipPlane");
     
 
     ShaderProgram waterProgram;
@@ -249,9 +249,10 @@ int main()
         skyboxProgram.bind();
         glUniformMatrix4fv(unifSkyboxProjection, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
 
-        auto drawTerrainAndSky = [&] {
+        auto drawTerrainAndSky = [&] (const glm::vec4& terrainClipPlane) {
             // glEnable(GL_CULL_FACE);
             terrainProgram.bind();
+            glUniform4fv(unifTerrainClipPlane, 1, glm::value_ptr(terrainClipPlane));
             glUniformMatrix4fv(unifTerrainView, 1, GL_FALSE, glm::value_ptr(camera.getView()));
             terrainMesh.draw();
 
@@ -264,6 +265,8 @@ int main()
         };
 
 
+        glEnable(GL_CLIP_DISTANCE0);
+
         //reflection pass
         float dist = 2 * (camera.getPosition().y - WATER_HEIGHT);
         camera.setPosition(camera.getPosition() - glm::vec3(0.f, dist, 0.f));
@@ -272,7 +275,7 @@ int main()
 
         reflectionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        drawTerrainAndSky();
+        drawTerrainAndSky(glm::vec4(0.f, 1.f, 0.f, -WATER_HEIGHT));
 
         camera.setPosition(camera.getPosition() + glm::vec3(0.f, dist, 0.f));
         camera.setRotation(camera.getYaw(), -camera.getPitch());
@@ -282,13 +285,15 @@ int main()
         // refraction pass
         refractionFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        drawTerrainAndSky();
+        drawTerrainAndSky(glm::vec4(0.f, -1.f, 0.f, WATER_HEIGHT));
+
 
 
         // water pass
+        glDisable(GL_CLIP_DISTANCE0);
         windowFramebuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        drawTerrainAndSky();
+        drawTerrainAndSky(glm::vec4(0.f, -1.f, 0.f, 15.f));
 
         // glEnable(GL_CULL_FACE);
         waterProgram.bind();

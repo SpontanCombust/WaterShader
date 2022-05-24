@@ -17,6 +17,7 @@ layout(location = 2) in vec2 avUV;
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
+uniform vec4 uClipPlane;
 // ================================
 
 
@@ -24,7 +25,9 @@ uniform mat4 uProjection;
 void main()
 {
     vs_out.position = vec3(uModel * vec4(avPosition, 1.0));
-	vs_out.normal = avNormal;
+    gl_ClipDistance[0] = dot(vec4(vs_out.position, 1.0), uClipPlane);
+
+	vs_out.normal = mat3(transpose(inverse(uModel))) * normalize(avNormal);
 	vs_out.uv = avUV;
 
 	gl_Position = uProjection * uView * uModel * vec4(avPosition, 1.0);   
