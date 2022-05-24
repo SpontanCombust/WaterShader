@@ -1,7 +1,7 @@
 # Blender MTL File: 'Landscape.blend'
 # Material Count: 2
 
-newmtl Material
+newmtl Landscape
 Ns 359.999993
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -10,14 +10,12 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd /home/spontan/GitHub-repo/WaterShader/assets/textures/Landscape.png
+map_Kd /home/spontan/GitHub-repo/WaterShader/assets/textures/landscape.jpg
 
-newmtl Material.001
-Ns 359.999993
-Ka 1.000000 1.000000 1.000000
-Kd 0.041353 0.075796 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.550000
-d 1.000000
+newmtl None
+Ns 500
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
 illum 2
