@@ -168,7 +168,7 @@ int main()
     float waveMovement = 0.f;
     float waterWaveSpeed = 0.008f;
     float waveStrength = 0.01f;
-    float waterReflecivity = 2.f;
+    float waterReflecivity = 1.f;
     glm::vec4 waterTint(0.f, 0.05, 0.15f, 1.f);
 
     waterProgram.bind();
@@ -215,6 +215,25 @@ int main()
 
         glfwPollEvents();
 
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        imgui::NewFrame();
+        imgui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        {
+            imgui::Text("W, A, S, D - move around");
+            imgui::Text("Q, E - disable/enable camera rotation");
+            imgui::NewLine();
+            imgui::SliderFloat("Water wave strength", &waveStrength, 0.f, 0.5f);
+            imgui::SliderFloat("Water wave speed", &waterWaveSpeed, 0.f, 0.1f);
+            imgui::SliderFloat("Water reflecivity", &waterReflecivity, 0.f, 8.f);
+            imgui::ColorEdit4("Water tint", glm::value_ptr(waterTint));
+        }
+        imgui::End();
+        imgui::Render();
+
+
+
         if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
@@ -223,19 +242,6 @@ int main()
         camera.update();
 
 
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        imgui::NewFrame();
-        imgui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        {
-            imgui::SliderFloat("Water wave strength", &waveStrength, 0.f, 0.5f);
-            imgui::SliderFloat("Water wave speed", &waterWaveSpeed, 0.f, 0.2f);
-            imgui::SliderFloat("Water reflecivity", &waterReflecivity, 0.f, 8.f);
-            imgui::ColorEdit4("Water tint", glm::value_ptr(waterTint));
-        }
-        imgui::End();
-        imgui::Render();
 
 
 

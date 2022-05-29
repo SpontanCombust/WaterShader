@@ -9,6 +9,9 @@
 #define CAMERA_MOVE_SPEED 5.f
 #define CAMERA_ROTATE_SPEED 10.f
 
+#define CURSOR_CONSTRAINT_X 1280 / 2
+#define CURSOR_CONSTRAINT_Y 720 / 2
+
 
 Camera::Camera()
 {
@@ -63,30 +66,33 @@ void Camera::handleInput(GLFWwindow *window, float deltaTime)
     }
     if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
         m_isRotationActive = false;
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);   
     }
     if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        m_isRotationActive = true;
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);   
+        m_isRotationActive = true;  
+        glfwSetCursorPos(window, CURSOR_CONSTRAINT_X, CURSOR_CONSTRAINT_Y); 
     }
 
-    static glm::dvec2 lastMousePos = getMousePosition(); // this initialization will be done only once
-    glm::dvec2 curMousePos = getMousePosition();
-    
     if(m_isRotationActive) {
-        glm::dvec2 motion = curMousePos - lastMousePos;
+        glm::dvec2 pos;
+        glfwGetCursorPos(glfwGetCurrentContext(), &pos.x, &pos.y);
+        glm::dvec2 motion = pos - glm::dvec2(CURSOR_CONSTRAINT_X, CURSOR_CONSTRAINT_Y);
+
         m_yaw += motion.x * deltaTime * CAMERA_ROTATE_SPEED;
         m_pitch -= motion.y * deltaTime * CAMERA_ROTATE_SPEED;
 
         m_pitch = glm::clamp(m_pitch, -89.f, 89.f);
+
+        glfwSetCursorPos(window, CURSOR_CONSTRAINT_X, CURSOR_CONSTRAINT_Y);
     }
-    
-    lastMousePos = curMousePos;
 }
 
 void Camera::update()
 {
     updateViewUsingRotation();
+
+    int cursorMode = m_isRotationActive ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
+    // have to set it on every update because imgui messes with it
+    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, cursorMode);
 }
 
 void Camera::setPosition(glm::vec3 position)
